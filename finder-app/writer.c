@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
 	}
 	ssize_t nr;
         nr = write(fd, writestr, strlen(writestr));
-	if (nr != sizeof(writestr)) {
+	if (nr != strlen(writestr)) {
 		syslog(LOG_ERR, "Error writing string.");
 		return 1;
 	}
