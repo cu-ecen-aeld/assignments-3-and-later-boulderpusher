@@ -1,0 +1,11 @@
+I am a child process attempting execv /bin/sh 
+home is /home/ben
+command /bin/sh ran with status 0
+Remove trailing newline
+Read I am a child process attempting execv /bin/sh  from testfile.txt
+execv /bin/sh -c echo home is $HOME returned I am a child process attempting execv /bin/sh 
+/home/ben/assignment-1-boulderpusher/assignment-autotest/test/assignment3/Test_systemcalls.c:82:test_exec_redirect_calls:FAIL: Expected -31 Was 0. The first 9 chars echoed should be "home is /".  The last chars will include the content of the $HOME variable
+
+-----------------------
+3 Tests 1 Failures 0 Ignored 
+FAIL

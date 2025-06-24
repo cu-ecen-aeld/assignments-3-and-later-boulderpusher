@@ -1,4 +1,12 @@
 #include "systemcalls.h"
+#include <stdlib.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <errno.h>
 
 /**
  * @param cmd the command to execute with system()
@@ -16,8 +24,9 @@ bool do_system(const char *cmd)
  *   and return a boolean true if the system() call completed with success
  *   or false() if it returned a failure
 */
-
-    return true;
+	int status;
+	status = system(cmd);
+	return (status == 0);
 }
 
 /**
@@ -44,11 +53,11 @@ bool do_exec(int count, ...)
     {
         command[i] = va_arg(args, char *);
     }
+    va_end(args);
     command[count] = NULL;
     // this line is to avoid a compile warning before your implementation is complete
     // and may be removed
-    command[count] = command[count];
-
+    // command[count] = command[count];
 /*
  * TODO:
  *   Execute a system command by calling fork, execv(),
@@ -59,7 +68,37 @@ bool do_exec(int count, ...)
  *
 */
 
-    va_end(args);
+    int status;
+    pid_t pid;
+    pid = fork();
+    if (pid == -1) { // fork error
+	return false;
+    }
+   
+    if (pid == 0) { // child process
+	int execresult;
+	printf("I am a child process attempting execv %s \n",command[0]);
+	execv(command[0], command);
+	execresult = errno;
+	printf("execv failed with error %d\n",execresult);
+	_exit(-1);
+    }
+   
+    if (waitpid(pid, &status, 0) == -1) {
+	    return false;
+    }
+
+    if (WIFEXITED(status)) {
+	    int wstatus;
+	    wstatus = WEXITSTATUS(status);
+	    printf("command %s ran with status %d\n", command[0], wstatus);
+	    bool succeeded;
+	    succeeded = (wstatus == 0);
+	    return succeeded;
+    } else {
+	    printf("abnormal exit from child");
+	    return false;
+    }
 
     return true;
 }
@@ -74,6 +113,8 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
     va_list args;
     va_start(args, count);
     char * command[count+1];
+    va_end(args);
+
     int i;
     for(i=0; i<count; i++)
     {
@@ -82,7 +123,7 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
     command[count] = NULL;
     // this line is to avoid a compile warning before your implementation is complete
     // and may be removed
-    command[count] = command[count];
+    // command[count] = command[count];
 
 
 /*
@@ -92,8 +133,45 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
  *   The rest of the behaviour is same as do_exec()
  *
 */
+    int fd = creat(outputfile, 0644);
+    if (fd == -1) {
+	    return false;
+    }
+    if (dup2(fd, 1) == -1) {
+	    return false;
+    }
 
-    va_end(args);
+    int status;
+    pid_t pid;
+    pid = fork();
+    if (pid == -1) { // fork error
+	return false;
+    }
+   
+    if (pid == 0) { // child process
+	int execresult;
+	printf("I am a child process attempting execv %s \n",command[0]);
+	execv(command[0], command);
+	execresult = errno;
+	printf("execv failed with error %d\n",execresult);
+	_exit(-1);
+    }
+   
+    if (waitpid(pid, &status, 0) == -1) {
+	    return false;
+    }
+
+    if (WIFEXITED(status)) {
+	    int wstatus;
+	    wstatus = WEXITSTATUS(status);
+	    printf("command %s ran with status %d\n", command[0], wstatus);
+	    bool succeeded;
+	    succeeded = (wstatus == 0);
+	    return succeeded;
+    } else {
+	    printf("abnormal exit from child");
+	    return false;
+    }
 
     return true;
 }
