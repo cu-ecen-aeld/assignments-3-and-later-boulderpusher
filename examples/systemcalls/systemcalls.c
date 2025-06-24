@@ -76,11 +76,7 @@ bool do_exec(int count, ...)
     }
    
     if (pid == 0) { // child process
-	int execresult;
-	printf("I am a child process attempting execv %s \n",command[0]);
 	execv(command[0], command);
-	execresult = errno;
-	printf("execv failed with error %d\n",execresult);
 	_exit(-1);
     }
    
@@ -91,12 +87,10 @@ bool do_exec(int count, ...)
     if (WIFEXITED(status)) {
 	    int wstatus;
 	    wstatus = WEXITSTATUS(status);
-	    printf("command %s ran with status %d\n", command[0], wstatus);
 	    bool succeeded;
 	    succeeded = (wstatus == 0);
 	    return succeeded;
     } else {
-	    printf("abnormal exit from child");
 	    return false;
     }
 
@@ -149,11 +143,7 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
     }
    
     if (pid == 0) { // child process
-	int execresult;
-	printf("I am a child process attempting execv %s \n",command[0]);
 	execv(command[0], command);
-	execresult = errno;
-	printf("execv failed with error %d\n",execresult);
 	_exit(-1);
     }
    
@@ -164,12 +154,10 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
     if (WIFEXITED(status)) {
 	    int wstatus;
 	    wstatus = WEXITSTATUS(status);
-	    printf("command %s ran with status %d\n", command[0], wstatus);
 	    bool succeeded;
 	    succeeded = (wstatus == 0);
 	    return succeeded;
     } else {
-	    printf("abnormal exit from child");
 	    return false;
     }
 
